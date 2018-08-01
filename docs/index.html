@@ -1,8 +1,284 @@
 <html>
     <head>
         <title>OpenLeaderboard Documentation</title>
+        <link rel="stylesheet" href="global.css" type="text/css">
     </head>
     <body>
-        <h1>OpenLeaderboard Documentation</h1>
+        <section id="main">
+            <h1>OpenLeaderboard Documentation</h1>
+            <p>OpenLeaderboard is a REST API that provides leaderboard and achievement tracking
+            services.</p>
+
+            <h2>API</h2>
+            <p>The API can be accessed in a variety of ways depending on service
+            configuration. The default config allows for JSON data to be
+            exchanged over HTTP. Protobuf over TCP can also be enabled if desired.</p>
+            <p>Some actions require a user ID - this is provided through an 
+            OAuth 2.0 bearer token. These actions are marked with a &#128273;.</p>
+            <h3>Apps</h3>
+            <p>Leaderboards and achievements are organized around apps. An app
+            can be anything from a mobile app for people who want to pick up
+            litter or a video game with lots of leaderboards and
+            achievements.</p>
+            <p>OpenLeaderboard can be configured to allow multiple apps, like
+            openleaderboard.io, or for a single app, for example if a user wants
+            to run a private instance for a single product. When configured for
+            a single app the app ID can be omitted from all endpoint URLs.</p>
+            <h4>Object Reference</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><em class="code">id</em></td>
+                        <td>String</td>
+                        <td>The unique identifier for this app.</td>
+                        <td><em class="code">"123e4567-e89b-12d3-a456-426655440000"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">name</em></td>
+                        <td>String</td>
+                        <td>The human readable name of the app.</td>
+                        <td><em class="code">"Sweet Stomp"</em></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Leaderboards</h3>
+            <p>A leaderboard is a simple list of scores. Leaderboards can be
+            filtered in various ways to avoid downloading a potentially massive
+            list of objects.</p>
+            <h4>HTTP Endpoints</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Method</th>
+                        <th>URL</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td><em class="code">/v1/apps/&lt;app_id&gt;/leaderboards/</em></td>
+                        <td>List all of the leaderboards for app &lt;app_id&gt;</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td><em
+                                class="code">/v1/leaderboards/&lt;leaderboard_id&gt;/&lt;list_type&gt;/&lt;time_period&gt;</em></td>
+                        <td>Get the &lt;list_type&gt; sub-list of the leaderboard with ID &lt;leaderboard_id&gt;.
+                            Possible list_types are:
+                            <ul>
+                                <li><strong>all</strong>: list all of the scores on this leaderboard.</li>
+                                <li><strong>friends</strong>: only list scores for this player's friends.</li>
+                            </ul>
+                            Possible time_periods are:
+                            <ul>
+                                <li><strong>all-time</strong>: show scores from all time.</li>
+                                <li><strong>this-week</strong>: show scores from the current week.</li>
+                                <li><strong>today</strong>: show scores from today.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>POST&nbsp;&#128273;</td>
+                        <td><em class="code">/v1/leaderboards/&lt;leaderboard_id&gt;</em></td>
+                        <td>Save a new score to leaderboard &lt;leaderboard_id&gt;. The body of the request should
+                            contain a <a href="#score-object">score</a> object.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h4>Object Reference</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><em class="code">id</em></td>
+                        <td>String</td>
+                        <td>The unique identifier for this leaderboard.</td>
+                        <td><em class="code">"123e4567-e89b-12d3-a456-426655440000"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">name</em></td>
+                        <td>String</td>
+                        <td>The human readable name of this leaderboard.</td>
+                        <td><em class="code">"High Scores"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">updated</em></td>
+                        <td>ISO8601</td>
+                        <td>The date and time when this leaderboard was last updated.</td>
+                        <td><em class="code">"1997-03-01T00:00:00+00:00"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">scores</em></td>
+                        <td>OrderedList(Score)</td>
+                        <td>An ordered list of the scores in this leaderboard</td>
+                        <td><em class="code">[{"index": 0, "score": {"player_name": "XxSwimmerGurl1992xX", ...}}, ...]</em></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Achievements</h3>
+            <p>Achievements track a user's highs and lows and provide rewards based on those values.</p>
+            <h4>HTTP Endpoints</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Method</th>
+                        <th>URL</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GET</td>
+                        <td><em class="code">/v1/apps/&lt;app_id&gt;/achievements/</em></td>
+                        <td>List all of the available achievements for app &lt;app_id&gt;</td>
+                    </tr>
+                    <tr>
+                        <td>GET</td>
+                        <td><em class="code">/v1/achievements/&lt;achievement_id&gt;</em></td>
+                        <td>Get achievement &lt;achievement_id&gt;. If a player ID is provided in the headers then this
+                        will show whether or not this achievement is unlocked for that player.</td>
+                    </tr>
+                    <tr>
+                        <td>PATCH&nbsp;&#128273;</td>
+                        <td><em class="code">/v1/achievements/&lt;achievement_id&gt;</em></td>
+                        <td>Lock/unlock achievement &lt;achievement_id&gt; for the current player. The body of the
+                            request should be a JSON object with any of these parameters:
+                            <ul>
+                                <li><strong>"locked"</strong>: <em class="code">true</em> to lock the achievement or <em class="code">false</em> to unlock it.
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Object Reference</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><em class="code">id</em></td>
+                        <td>String</td>
+                        <td>The unique identifier for this achievement.</td>
+                        <td><em class="code">"123e4567-e89b-12d3-a456-426655440000"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">name</em></td>
+                        <td>String</td>
+                        <td>The human readable name for this achievement.</td>
+                        <td><em class="code">"Slipped and Fell"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">description</em></td>
+                        <td>String</td>
+                        <td>The human readable description of this achievement.</td>
+                        <td><em class="code">"Slipped on a banana peel and fell down the stairs."</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">locked_icon</em></td>
+                        <td>Base64</td>
+                        <td>A base64-encoded image to be displayed when the achievement is locked</td>
+                        <td><em class="code">aGVubG8=</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">unlocked_icon</em></td>
+                        <td>Base64</td>
+                        <td>A base64-encoded image to be displayed when the achievement is unlocked</td>
+                        <td><em class="code">aGVubG8=</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">global_unlocked</em></td>
+                        <td>float</td>
+                        <td>The fraction of all users that have unlocked this achievement.</td>
+                        <td><em class="code">0.431</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">unlocked</em></td>
+                        <td>Boolean or null</td>
+                        <td>Whether or not the current user has unlocked this achievement. Null if no user is logged in.</td>
+                        <td><em class="code">true</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">unlock_date</em></td>
+                        <td>ISO8601 or null</td>
+                        <td>When the current user unlocked this achievement. Null if no user is logged in or if the
+                            acheivement is locked.</td>
+                        <td><em class="code">"2015-10-21T16:29:29-07:00"</em></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Scores</h3>
+            <p>Scores are how a user's position in the leaderboard is tracked. Only the highest score for any particular
+            day is saved.</p>
+            
+            <h4 id="score-object">Object Reference</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><em class="code">id</em></td>
+                        <td>String</td>
+                        <td>The unique identifier for this score.</td>
+                        <td><em class="code">"123e4567-e89b-12d3-a456-426655440000"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">player_id</em></td>
+                        <td>String</td>
+                        <td>The ID of the player this score belongs to.</td>
+                        <td><em class="code">"123e4567-e89b-12d3-a456-426655440000"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">date</em></td>
+                        <td>ISO8601</td>
+                        <td>The date this score was uploaded</td>
+                        <td><em class="code">"1985-10-26T01:22:22-07:00"</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">value</em></td>
+                        <td>float</td>
+                        <td>The amount of this score in the provided unit.</td>
+                        <td><em class="code">145301.991</em></td>
+                    </tr>
+                    <tr>
+                        <td><em class="code">unit</em></td>
+                        <td>Unit</td>
+                        <td>The unit for the value of this score.</td>
+                        <td><em class="code">ms</em></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
     </body>
 </html>
